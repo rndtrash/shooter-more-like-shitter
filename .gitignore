@@ -2,8 +2,8 @@
 .codegen/
 obj/
 code/accesslist.txt
+code/*.csproj
 .intermediate
 tools_asset_info.bin
 code/Properties/launchSettings.json
-dm98.csproj
 Properties/launchSettings.json
