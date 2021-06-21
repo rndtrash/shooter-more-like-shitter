@@ -4,13 +4,13 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 
-partial class DeathmatchPlayer : Player
+partial class SMLSPlayer : Player
 {
 	TimeSince timeSinceDropped;
 
 	public bool SupressPickupNotices { get; private set; }
 
-	public DeathmatchPlayer()
+	public SMLSPlayer()
 	{
 		Inventory = new DmInventory( this );
 	}
@@ -20,23 +20,22 @@ partial class DeathmatchPlayer : Player
 		SetModel( "models/citizen/citizen.vmdl" );
 
 		Controller = new WalkController();
-		Animator = new StandardPlayerAnimator();
+		Animator = new TPoseAnimator();
 		Camera = new FirstPersonCamera();
-		  
-		EnableAllCollisions = true; 
-		EnableDrawing = true; 
+
+		EnableAllCollisions = true;
+		EnableDrawing = true;
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
 
-		Dress();
 		ClearAmmo();
 
 		SupressPickupNotices = true;
 
 		Inventory.Add( new Pistol(), true );
-		//Inventory.Add( new Shotgun() );
-		//Inventory.Add( new SMG() );
-		//Inventory.Add( new Crossbow() );
+		Inventory.Add( new Shotgun() );
+		Inventory.Add( new SMG() );
+		Inventory.Add( new Crossbow() );
 
 		GiveAmmo( AmmoType.Pistol, 100 );
 		GiveAmmo( AmmoType.Buckshot, 8 );
@@ -142,77 +141,9 @@ partial class DeathmatchPlayer : Player
 		base.StartTouch( other );
 	}
 
-	Rotation lastCameraRot = Rotation.Identity;
-
 	public override void PostCameraSetup( ref CameraSetup setup )
 	{
 		base.PostCameraSetup( ref setup );
-
-		if ( lastCameraRot == Rotation.Identity )
-			lastCameraRot = setup.Rotation;
-
-		var angleDiff = Rotation.Difference( lastCameraRot, setup.Rotation );
-		var angleDiffDegrees = angleDiff.Angle();
-		var allowance = 20.0f;
-
-		if ( angleDiffDegrees > allowance )
-		{
-			// We could have a function that clamps a rotation to within x degrees of another rotation?
-			lastCameraRot = Rotation.Lerp( lastCameraRot, setup.Rotation, 1.0f - (allowance / angleDiffDegrees) );
-		}
-		else
-		{
-			//lastCameraRot = Rotation.Lerp( lastCameraRot, Camera.Rotation, Time.Delta * 0.2f * angleDiffDegrees );
-		}
-
-		// uncomment for lazy cam
-		//camera.Rotation = lastCameraRot;
-
-		if ( setup.Viewer != null )
-		{
-			AddCameraEffects( ref setup );
-		}
-	}
-
-	float walkBob = 0;
-	float lean = 0;
-	float fov = 0;
-
-	private void AddCameraEffects( ref CameraSetup setup )
-	{
-		var speed = Velocity.Length.LerpInverse( 0, 320 );
-		var forwardspeed = Velocity.Normal.Dot( setup.Rotation.Forward );
-
-		var left = setup.Rotation.Left;
-		var up = setup.Rotation.Up;
-
-		if ( GroundEntity != null )
-		{
-			walkBob += Time.Delta * 25.0f * speed;
-		}
-
-		setup.Position += up * MathF.Sin( walkBob ) * speed * 2;
-		setup.Position += left * MathF.Sin( walkBob * 0.6f ) * speed * 1;
-
-		// Camera lean
-		lean = lean.LerpTo( Velocity.Dot( setup.Rotation.Right ) * 0.03f, Time.Delta * 15.0f );
-
-		var appliedLean = lean;
-		appliedLean += MathF.Sin( walkBob ) * speed * 0.2f;
-		setup.Rotation *= Rotation.From( 0, 0, appliedLean );
-
-		speed = (speed - 0.7f).Clamp( 0, 1 ) * 3.0f;
-
-		fov = fov.LerpTo( speed * 20 * MathF.Abs( forwardspeed ), Time.Delta * 2.0f );
-
-		setup.FieldOfView += fov;
-
-	//	var tx = new Sandbox.UI.PanelTransform();
-	//	tx.AddRotation( 0, 0, lean * -0.1f );
-
-	//	Hud.CurrentPanel.Style.Transform = tx;
-	//	Hud.CurrentPanel.Style.Dirty(); 
-
 	}
 
 	DamageInfo LastDamage;
@@ -230,7 +161,7 @@ partial class DeathmatchPlayer : Player
 
 		base.TakeDamage( info );
 
-		if ( info.Attacker is DeathmatchPlayer attacker && attacker != this )
+		if ( info.Attacker is SMLSPlayer attacker && attacker != this )
 		{
 			// Note - sending this only to the attacker!
 			attacker.DidDamage( To.Single( attacker ), info.Position, info.Damage, Health.LerpInverse( 100, 0 ) );
