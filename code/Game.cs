@@ -16,13 +16,14 @@ public partial class SMLSGame : Game
 		Finished
 	}
 
-	[ConVar.Replicated("smls_gamestate")]
+	[ConVar.Replicated( "smls_gamestate" )]
 	public static State GameStateConVar { get { return (Game.Current as SMLSGame).GameState; } }
 
-	public State GameState {
+	public State GameState
+	{
 		set
 		{
-			switch (value)
+			switch ( value )
 			{
 				case State.WaitingForPlayers:
 					ResetPlayerList();
@@ -38,7 +39,7 @@ public partial class SMLSGame : Game
 			gameState = value;
 			// FIXME: meh, doesn't work with panel
 			//Event.Run( "smls.gamestatechange" );
-			StartScreen.OnGameStateChange(gameState);
+			StartScreen.OnGameStateChange( gameState );
 		}
 		get
 		{
@@ -59,8 +60,8 @@ public partial class SMLSGame : Game
 		//
 		if ( IsServer )
 		{
-			ResetPlayerList();
 			new SMLSHud();
+			GameState = State.WaitingForPlayers;
 		}
 	}
 
@@ -92,8 +93,8 @@ public partial class SMLSGame : Game
 		StartScreen.RemoveClientRPC( cl.NetworkIdent );
 	}
 
-	[ServerCmd("smls_ready")]
-	public static void SetReadinessCmd(int networkIdent)
+	[ServerCmd( "smls_ready" )]
+	public static void SetReadinessCmd( int networkIdent )
 	{
 		var game = Current as SMLSGame;
 		if ( game.GameState != State.WaitingForPlayers )
@@ -102,7 +103,7 @@ public partial class SMLSGame : Game
 		game.SetReadiness( networkIdent );
 	}
 
-	public void SetReadiness(int networkIdent)
+	public void SetReadiness( int networkIdent )
 	{
 		Host.AssertServer();
 
@@ -114,20 +115,20 @@ public partial class SMLSGame : Game
 		Log.Info( $"{networkIdent} is ready!" );
 
 		bool isEveryoneReady = true;
-		foreach (var p in playerList)
+		foreach ( var p in playerList )
 		{
-			if (!p.Value)
+			if ( !p.Value )
 			{
 				isEveryoneReady = false;
 				break;
 			}
 		}
-		if (isEveryoneReady)
+		if ( isEveryoneReady )
 		{
 			GameState = State.InGame;
 		}
 	}
-	
+
 	protected void ResetPlayerList()
 	{
 		Host.AssertServer();

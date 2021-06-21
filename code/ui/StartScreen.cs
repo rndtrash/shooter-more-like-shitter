@@ -17,14 +17,14 @@ public partial class StartScreen : Panel
 
 		StyleSheet.Load( "/ui/StartScreen.scss" );
 
-		var p = Add.Panel("sscontainer");
+		var p = Add.Panel( "sscontainer" );
 
 		var l = p.AddChild<Label>( "header" );
 		l.Text = "test";
 
 		userPanel = p.Add.Panel( "userpanel" );
 
-		var b = p.Add.Button( "imready", () => { ConsoleSystem.Run("smls_ready", Local.Client.NetworkIdent); } );
+		var b = p.Add.Button( "imready", () => { ConsoleSystem.Run( "smls_ready", Local.Client.NetworkIdent ); } );
 		b.Text = "I'm ready!"; // TODO: change the color of this button when user is ready
 	}
 
@@ -34,7 +34,7 @@ public partial class StartScreen : Panel
 		if ( players.ContainsKey( networkIdent ) )
 			return;
 
-		var p = userPanel.Add.Panel("user");
+		var p = userPanel.Add.Panel( "user" );
 		p.Add.Image( $"avatar:{steamId}", "pfp" );
 		p.Add.Label( $"{name}" );
 
@@ -52,7 +52,7 @@ public partial class StartScreen : Panel
 	}
 
 	[Obsolete]
-	public void SetReadyClient(int networkIdent, bool isReady)
+	public void SetReadyClient( int networkIdent, bool isReady )
 	{
 		if ( !players.ContainsKey( networkIdent ) )
 			return;
@@ -79,7 +79,7 @@ public partial class StartScreen : Panel
 	}
 
 	[ClientRpc]
-	public static void OnGameStateChange(SMLSGame.State gameState)
+	public static void OnGameStateChange( SMLSGame.State gameState )
 	{
 		Instance.SetClass( "hide", gameState != SMLSGame.State.WaitingForPlayers );
 	}
