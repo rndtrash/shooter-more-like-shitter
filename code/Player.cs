@@ -1,8 +1,5 @@
 ﻿using Sandbox;
-using System;
 using System.Linq;
-using System.Numerics;
-using System.Threading;
 
 partial class SMLSPlayer : Player
 {
@@ -17,9 +14,10 @@ partial class SMLSPlayer : Player
 
 	public override void Respawn()
 	{
-		SetModel( "models/citizen/citizen.vmdl" );
+		//SetModel( "models/citizen/citizen.vmdl" );
+		SetModel( "models/smls.player.vmdl" );
 
-		Controller = new WalkController();
+		Controller = new SMLSController();
 		Animator = new TPoseAnimator();
 		Camera = new FirstPersonCamera();
 
@@ -45,6 +43,12 @@ partial class SMLSPlayer : Player
 		Health = 100;
 
 		base.Respawn();
+
+		// TODO: color the player depending on his color
+		using ( Prediction.Off() )
+		{
+			ColorPlayerRPC( this );
+		}
 	}
 	public override void OnKilled()
 	{
@@ -185,5 +189,20 @@ partial class SMLSPlayer : Player
 		//DebugOverlay.Sphere( pos, 5.0f, Color.Red, false, 50.0f );
 
 		DamageIndicator.Current?.OnHit( pos );
+	}
+
+	[ClientRpc]
+	public void ColorPlayerRPC( SMLSPlayer e )
+	{
+		e.RenderColor = new Color32(254, 1, 154);//Color.Random;
+	}
+
+	[ClientCmd("smls_newcolor")]
+	public static void NewColor(int r, int g, int b)
+	{
+		using (Prediction.Off())
+		{
+			(Local.Pawn as SMLSPlayer).RenderColor = new Color32( (byte)r, (byte)g, (byte)b );
+		}
 	}
 }

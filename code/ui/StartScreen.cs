@@ -83,4 +83,13 @@ public partial class StartScreen : Panel
 	{
 		Instance.SetClass( "hide", gameState != SMLSGame.State.WaitingForPlayers );
 	}
+
+	[ClientRpc]
+	public static void SetInitialUsersRPC( int[] networkIdents, ulong[] steamIds, string[] names )
+	{
+		for (var i = 0; i < networkIdents.Length; i++ )
+		{
+			Instance.AddClient( networkIdents[i], steamIds[i], names[i] );
+		}
+	}
 }

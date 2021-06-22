@@ -1,0 +1,12 @@
+// THIS FILE IS AUTO-GENERATED
+
+Layer0
+{
+	shader "solidcolor.vfx"
+
+	//---- Animation ----
+	F_MORPH_SUPPORTED 1
+
+	//---- Color ----
+	g_vColorTint "[1.000000 1.000000 1.000000 1.000000]"
+}

@@ -47,8 +47,14 @@ public partial class SMLSGame : Game
 		}
 	}
 
+	public struct PlayerListDictItem
+	{
+		public Client Client;
+		public bool IsReady;
+	}
+
 	protected State gameState = State.WaitingForPlayers;
-	protected Dictionary<int, bool> playerList;
+	protected Dictionary<int, PlayerListDictItem> playerList;
 
 	public SMLSGame()
 	{
@@ -75,14 +81,25 @@ public partial class SMLSGame : Game
 	public override void ClientJoined( Client cl )
 	{
 		base.ClientJoined( cl );
-		Log.Info( $"{cl.NetworkIdent}" );
 
-		playerList.Add( cl.NetworkIdent, false );
+		playerList.Add( cl.NetworkIdent, new PlayerListDictItem { Client = cl, IsReady = false } ); ;
+		StartScreen.OnGameStateChange( To.Single(cl), GameState );
+		{
+			int[] networkIdents = new int[playerList.Count];
+			ulong[] steamIds = new ulong[playerList.Count];
+			string[] names = new string[playerList.Count];
+			var i = 0;
+			foreach ( var p in playerList.Values )
+			{
+				networkIdents[i] = p.Client.NetworkIdent;
+				steamIds[i] = p.Client.SteamId;
+				names[i] = p.Client.Name;
+				i++;
+			}
+
+			StartScreen.SetInitialUsersRPC(networkIdents, steamIds, names);
+		}
 		StartScreen.AddClientRPC( cl.NetworkIdent, cl.SteamId, cl.Name );
-
-		var player = new SMLSPlayer();
-		cl.Pawn = player;
-		player.Respawn();
 	}
 
 	public override void ClientDisconnect( Client cl, NetworkDisconnectionReason reason )
@@ -110,14 +127,14 @@ public partial class SMLSGame : Game
 		if ( !playerList.ContainsKey( networkIdent ) )
 			return;
 
-		playerList[networkIdent] = true;
+		playerList[networkIdent] = new PlayerListDictItem() { Client = playerList[networkIdent].Client, IsReady = true };
 		StartScreen.SetReadinessRPC( networkIdent );
 		Log.Info( $"{networkIdent} is ready!" );
 
 		bool isEveryoneReady = true;
 		foreach ( var p in playerList )
 		{
-			if ( !p.Value )
+			if ( !p.Value.IsReady )
 			{
 				isEveryoneReady = false;
 				break;
@@ -133,16 +150,23 @@ public partial class SMLSGame : Game
 	{
 		Host.AssertServer();
 
-		playerList = new Dictionary<int, bool>();
+		playerList = new Dictionary<int, PlayerListDictItem>();
 		foreach ( var p in Client.All )
 		{
-			playerList.Add( p.NetworkIdent, false );
+			playerList.Add( p.NetworkIdent, new PlayerListDictItem { Client = p, IsReady = false } );
 		}
 	}
 
 	public void StartGame()
 	{
 		Host.AssertServer();
+
+		foreach ( var client in Client.All )
+		{
+			var player = new SMLSPlayer();
+			client.Pawn = player;
+			player.Respawn();
+		}
 
 		Log.Error( "TODO: start the game" );
 	}

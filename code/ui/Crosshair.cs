@@ -17,12 +17,16 @@ public class Crosshair : Panel
 			var p = Add.Panel( "element" );
 			p.AddClass( $"el{i}" );
 		}
+
+		Style.Left = Length.Fraction( .50f );
+		Style.Top = Length.Fraction( .50f );
+		Style.Dirty();
 	}
 
 	public override void Tick()
 	{
 		base.Tick();
-		//this.PositionAtCrosshair();
+		this.PositionAtCrosshair();
 
 		SetClass( "fire", fireCounter > 0 );
 
