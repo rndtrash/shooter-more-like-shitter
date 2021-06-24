@@ -1,52 +1,44 @@
 // 
 // Crossbow : BaseDmWeapon 
 // 
-@PointClass  editormodel( "weapons/rust_crossbow/rust_crossbow.vmdl" ) 
-metadata
-{
-}
-= dm_crossbow : ""
+@PointClass  editormodel( "weapons/rust_crossbow/rust_crossbow.vmdl" ) = dm_crossbow : ""
 [
 	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
 	parentname(target_destination) [ group="Hierarchy" ] : "Parent" : : "The name of this entity's parent in the movement hierarchy. Entities with parents move with their parent."
+	disableshadows(boolean) [ group="Render Properties" ] : "Disable shadow casting" : 0 : "Disable shadow casting for this entity"
+
 ]
 
 // 
 // Pistol : BaseDmWeapon 
 // 
-@PointClass  editormodel( "weapons/rust_pistol/rust_pistol.vmdl" ) 
-metadata
-{
-}
-= dm_pistol : ""
+@PointClass  editormodel( "weapons/rust_pistol/rust_pistol.vmdl" ) = dm_pistol : ""
 [
 	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
 	parentname(target_destination) [ group="Hierarchy" ] : "Parent" : : "The name of this entity's parent in the movement hierarchy. Entities with parents move with their parent."
+	disableshadows(boolean) [ group="Render Properties" ] : "Disable shadow casting" : 0 : "Disable shadow casting for this entity"
+
 ]
 
 // 
 // Shotgun : BaseDmWeapon 
 // 
-@PointClass  editormodel( "weapons/rust_pumpshotgun/rust_pumpshotgun.vmdl" ) 
-metadata
-{
-}
-= dm_shotgun : ""
+@PointClass  editormodel( "weapons/rust_pumpshotgun/rust_pumpshotgun.vmdl" ) = dm_shotgun : ""
 [
 	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
 	parentname(target_destination) [ group="Hierarchy" ] : "Parent" : : "The name of this entity's parent in the movement hierarchy. Entities with parents move with their parent."
+	disableshadows(boolean) [ group="Render Properties" ] : "Disable shadow casting" : 0 : "Disable shadow casting for this entity"
+
 ]
 
 // 
 // SMG : BaseDmWeapon 
 // 
-@PointClass  editormodel( "weapons/rust_smg/rust_smg.vmdl" ) 
-metadata
-{
-}
-= dm_smg : ""
+@PointClass  editormodel( "weapons/rust_smg/rust_smg.vmdl" ) = dm_smg : ""
 [
 	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
 	parentname(target_destination) [ group="Hierarchy" ] : "Parent" : : "The name of this entity's parent in the movement hierarchy. Entities with parents move with their parent."
+	disableshadows(boolean) [ group="Render Properties" ] : "Disable shadow casting" : 0 : "Disable shadow casting for this entity"
+
 ]
 

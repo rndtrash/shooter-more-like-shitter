@@ -19,7 +19,10 @@ partial class SMLSPlayer : Player
 
 		Controller = new SMLSController();
 		Animator = new TPoseAnimator();
-		Camera = new FirstPersonCamera();
+		Camera = new InGameCamera()
+		{
+			FieldOfView = 120.0f
+		};
 
 		EnableAllCollisions = true;
 		EnableDrawing = true;
