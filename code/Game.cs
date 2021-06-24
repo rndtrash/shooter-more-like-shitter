@@ -23,19 +23,23 @@ public partial class SMLSGame : Game
 	{
 		set
 		{
-			switch ( value )
+			if ( gameState != value )
 			{
-				case State.WaitingForPlayers:
-					ResetPlayerList();
-					break;
-				case State.InGame:
-					StartGame();
-					break;
-				default:
-					Log.Warning( $"GameState {value} is not implemented!" );
-					break;
-			}
 
+				switch ( value )
+				{
+					case State.WaitingForPlayers:
+						ResetPlayerList();
+						break;
+					case State.InGame:
+						StartGame();
+						break;
+					default:
+						Log.Warning( $"GameState {value} is not implemented!" );
+						break;
+				}
+
+			}
 			gameState = value;
 			// FIXME: meh, doesn't work with panel
 			//Event.Run( "smls.gamestatechange" );
@@ -54,11 +58,10 @@ public partial class SMLSGame : Game
 	}
 
 	protected State gameState = State.WaitingForPlayers;
-	protected Dictionary<int, PlayerListDictItem> playerList;
+	protected Dictionary<int, PlayerListDictItem> playerList = new Dictionary<int, PlayerListDictItem>();
 
 	public SMLSGame()
 	{
-
 		//
 		// Create the HUD entity. This is always broadcast to all clients
 		// and will create the UI panels clientside. It's accessible 
@@ -169,5 +172,11 @@ public partial class SMLSGame : Game
 		}
 
 		Log.Error( "TODO: start the game" );
+	}
+
+	[AdminCmd("smls_forcestart")]
+	public static void ForceStartGame()
+	{
+		(Game.Current as SMLSGame).GameState = State.InGame;
 	}
 }

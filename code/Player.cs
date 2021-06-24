@@ -14,8 +14,8 @@ partial class SMLSPlayer : Player
 
 	public override void Respawn()
 	{
-		//SetModel( "models/citizen/citizen.vmdl" );
-		SetModel( "models/smls.player.vmdl" );
+		SetModel( "models/citizen/citizen.vmdl" );
+		//SetModel( "models/smls.player.vmdl" );
 
 		Controller = new SMLSController();
 		Animator = new TPoseAnimator();
