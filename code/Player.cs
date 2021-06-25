@@ -1,11 +1,22 @@
 ﻿using Sandbox;
+using System;
 using System.Linq;
 
-partial class SMLSPlayer : Player
+public partial class SMLSPlayer : Player
 {
+	public enum Team
+	{
+		Spectator,
+		TeamAlpha,
+		TeamBeta,
+		FFA
+	}
+
 	TimeSince timeSinceDropped;
 
 	public bool SupressPickupNotices { get; private set; }
+	[Net]
+	public Team PlayerTeam { get; set; }
 
 	public SMLSPlayer()
 	{
@@ -17,12 +28,15 @@ partial class SMLSPlayer : Player
 		SetModel( "models/citizen/citizen.vmdl" );
 		//SetModel( "models/smls.player.vmdl" );
 
-		Controller = new SMLSController();
-		Animator = new TPoseAnimator();
-		Camera = new InGameCamera()
+		using ( Prediction.Off() )
 		{
-			FieldOfView = 120.0f
-		};
+			Controller = new SMLSController();
+			Animator = new TPoseAnimator();
+			Camera = new InGameCamera()
+			{
+				FieldOfView = 120.0f
+			};
+		}
 
 		EnableAllCollisions = true;
 		EnableDrawing = true;
@@ -197,15 +211,24 @@ partial class SMLSPlayer : Player
 	[ClientRpc]
 	public void ColorPlayerRPC( SMLSPlayer e )
 	{
-		e.RenderColor = new Color32(254, 1, 154);//Color.Random;
+		e.RenderColor = Settings.Instance.GetPlayerColor(e);
 	}
 
-	[ClientCmd("smls_newcolor")]
-	public static void NewColor(int r, int g, int b)
+	[ClientCmd("smls_newcolor_rgb")]
+	public static void NewColorRGB(int r, int g, int b) // FIXME: doesn't work with bytes
 	{
 		using (Prediction.Off())
 		{
 			(Local.Pawn as SMLSPlayer).RenderColor = new Color32( (byte)r, (byte)g, (byte)b );
+		}
+	}
+
+	[ClientCmd( "smls_newcolor_hsv" )]
+	public static void NewColorHSV( float h, float s, float v )
+	{
+		using ( Prediction.Off() )
+		{
+			(Local.Pawn as SMLSPlayer).RenderColor = new Etc.HSV(h, s, v).ToColor();
 		}
 	}
 }

@@ -44,6 +44,7 @@ public partial class SMLSGame : Game
 			// FIXME: meh, doesn't work with panel
 			//Event.Run( "smls.gamestatechange" );
 			StartScreen.OnGameStateChange( gameState );
+			SMLSHud.OnGameStateChange( gameState );
 		}
 		get
 		{
@@ -87,6 +88,7 @@ public partial class SMLSGame : Game
 
 		playerList.Add( cl.NetworkIdent, new PlayerListDictItem { Client = cl, IsReady = false } ); ;
 		StartScreen.OnGameStateChange( To.Single(cl), GameState );
+		SMLSHud.OnGameStateChange( To.Single( cl ), gameState );
 		{
 			int[] networkIdents = new int[playerList.Count];
 			ulong[] steamIds = new ulong[playerList.Count];
@@ -167,6 +169,14 @@ public partial class SMLSGame : Game
 		foreach ( var client in Client.All )
 		{
 			var player = new SMLSPlayer();
+			// TODO: make admin choose between FFA and TDM
+			if ( false )
+			{
+				player.PlayerTeam = Rand.Int( 0, 1 ) == 0 ? SMLSPlayer.Team.TeamAlpha : SMLSPlayer.Team.TeamBeta;
+			} else
+			{
+				player.PlayerTeam = SMLSPlayer.Team.FFA;
+			}
 			client.Pawn = player;
 			player.Respawn();
 		}

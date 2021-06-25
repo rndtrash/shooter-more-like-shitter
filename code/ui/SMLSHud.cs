@@ -8,10 +8,14 @@ using System.Threading.Tasks;
 [Library]
 public partial class SMLSHud : HudEntity<RootPanel>
 {
+	public static SMLSHud Instance;
+
 	public SMLSHud()
 	{
 		if ( !IsClient )
 			return;
+
+		Instance = this;
 
 		RootPanel.StyleSheet.Load( "/ui/SMLSHud.scss" );
 
@@ -33,6 +37,11 @@ public partial class SMLSHud : HudEntity<RootPanel>
 		RootPanel.AddChild<StartScreen>();
 	}
 
+	private void SwitchPanelsToState(SMLSGame.State gameState)
+	{
+		//
+	}
+
 	[ClientRpc]
 	public void OnPlayerDied( string victim, string attacker = null )
 	{
@@ -43,5 +52,12 @@ public partial class SMLSHud : HudEntity<RootPanel>
 	public void ShowDeathScreen( string attackerName )
 	{
 		Host.AssertClient();
+	}
+
+
+	[ClientRpc]
+	public static void OnGameStateChange( SMLSGame.State gameState )
+	{
+		Instance.SwitchPanelsToState( gameState );
 	}
 }
