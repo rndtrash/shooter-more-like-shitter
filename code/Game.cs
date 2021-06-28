@@ -16,8 +16,17 @@ public partial class SMLSGame : Game
 		Finished
 	}
 
+	public enum Mode
+	{
+		TDM,
+		FFA
+	}
+
 	[ConVar.Replicated( "smls_gamestate" )]
 	public static State GameStateConVar { get { return (Game.Current as SMLSGame).GameState; } }
+
+	[ConVar.Replicated( "smls_gamemode" )]
+	public static State GameModeConVar { get { return (Game.Current as SMLSGame).GameMode; } }
 
 	public State GameState
 	{
@@ -52,6 +61,18 @@ public partial class SMLSGame : Game
 		}
 	}
 
+	public Mode GameMode
+	{
+		set
+		{
+			gameMode = value;
+		}
+		get
+		{
+			return gameMode;
+		}
+	}
+
 	public struct PlayerListDictItem
 	{
 		public Client Client;
@@ -59,6 +80,7 @@ public partial class SMLSGame : Game
 	}
 
 	protected State gameState = State.WaitingForPlayers;
+	protected Mode gameMode = Mode.FFA;
 	protected Dictionary<int, PlayerListDictItem> playerList = new Dictionary<int, PlayerListDictItem>();
 
 	public SMLSGame()
@@ -87,7 +109,7 @@ public partial class SMLSGame : Game
 		base.ClientJoined( cl );
 
 		playerList.Add( cl.NetworkIdent, new PlayerListDictItem { Client = cl, IsReady = false } ); ;
-		StartScreen.OnGameStateChange( To.Single(cl), GameState );
+		StartScreen.OnGameStateChange( To.Single( cl ), GameState );
 		SMLSHud.OnGameStateChange( To.Single( cl ), gameState );
 		{
 			int[] networkIdents = new int[playerList.Count];
@@ -102,9 +124,12 @@ public partial class SMLSGame : Game
 				i++;
 			}
 
-			StartScreen.SetInitialUsersRPC(networkIdents, steamIds, names);
+			StartScreen.SetInitialUsersRPC( networkIdents, steamIds, names );
 		}
 		StartScreen.AddClientRPC( cl.NetworkIdent, cl.SteamId, cl.Name );
+
+		if ( GameMode == Mode.FFA )
+			RespawnClient( cl );
 	}
 
 	public override void ClientDisconnect( Client cl, NetworkDisconnectionReason reason )
@@ -168,25 +193,46 @@ public partial class SMLSGame : Game
 
 		foreach ( var client in Client.All )
 		{
-			var player = new SMLSPlayer();
-			// TODO: make admin choose between FFA and TDM
-			if ( false )
+			if ( client.Pawn is FPSPlayer p )
 			{
-				player.PlayerTeam = Rand.Int( 0, 1 ) == 0 ? SMLSPlayer.Team.TeamAlpha : SMLSPlayer.Team.TeamBeta;
-			} else
-			{
-				player.PlayerTeam = SMLSPlayer.Team.FFA;
+				p.Delete();
 			}
-			client.Pawn = player;
-			player.Respawn();
+			RespawnClient( client );
 		}
 
 		Log.Error( "TODO: start the game" );
 	}
 
-	[AdminCmd("smls_forcestart")]
+	[AdminCmd("smls_forcerespawn")]
+	public static void ForceRespawn()
+	{
+		foreach ( var client in Client.All )
+		{
+			if ( client.Pawn is FPSPlayer )
+				return;
+			RespawnClient( client );
+		}
+	}
+
+	[AdminCmd( "smls_forcestart" )]
 	public static void ForceStartGame()
 	{
 		(Game.Current as SMLSGame).GameState = State.InGame;
+	}
+
+	public static void RespawnClient(Client client)
+	{
+		var player = new FPSPlayer();
+
+		if ( (Game.Current as SMLSGame).GameMode == Mode.TDM )
+		{
+			player.Team = Rand.Int( 0, 1 ) == 0 ? SMLSBasePlayer.PlayerTeam.TeamAlpha : SMLSBasePlayer.PlayerTeam.TeamBeta;
+		}
+		else
+		{
+			player.Team = SMLSBasePlayer.PlayerTeam.FFA;
+		}
+		client.Pawn = player;
+		player.Respawn();
 	}
 }

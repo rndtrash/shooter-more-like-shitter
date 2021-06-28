@@ -10,19 +10,10 @@ using System.Threading.Tasks;
 partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 {
 	public virtual AmmoType AmmoType => AmmoType.Pistol;
-	public virtual int ClipSize => 16;
-	public virtual float ReloadTime => 3.0f;
 	public virtual int Bucket => 1;
 	public virtual int BucketWeight => 100;
-
-	[Net, Predicted]
-	public int AmmoClip { get; set; }
-
-	[Net, Predicted]
-	public TimeSince TimeSinceReload { get; set; }
-
-	[Net, Predicted]
-	public bool IsReloading { get; set; }
+	public virtual int MaxAmmo => 100;
+	public virtual float DeployTime => 0.6f;
 
 	[Net, Predicted]
 	public TimeSince TimeSinceDeployed { get; set; }
@@ -30,10 +21,9 @@ partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 
 	public PickupTrigger PickupTrigger { get; protected set; }
 
-
 	public int AvailableAmmo()
 	{
-		var owner = Owner as SMLSPlayer;
+		var owner = Owner as FPSPlayer;
 		if ( owner == null ) return 0;
 		return owner.AmmoCount( AmmoType );
 	}
@@ -43,8 +33,6 @@ partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 		base.ActiveStart( ent );
 
 		TimeSinceDeployed = 0;
-
-		IsReloading = false;
 	}
 
 	public override string ViewModelPath => "weapons/rust_pistol/v_rust_pistol.vmdl";
@@ -60,67 +48,12 @@ partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 		PickupTrigger.Position = Position;
 	}
 
-	public override void Reload()
-	{
-		if ( IsReloading )
-			return;
-
-		if ( AmmoClip >= ClipSize )
-			return;
-
-		TimeSinceReload = 0;
-
-		if ( Owner is SMLSPlayer player )
-		{
-			if ( player.AmmoCount( AmmoType ) <= 0 )
-				return;
-
-			StartReloadEffects();
-		}
-
-		IsReloading = true;
-
-		(Owner as AnimEntity).SetAnimBool( "b_reload", true );
-
-		StartReloadEffects();
-	}
-
 	public override void Simulate( Client owner )
 	{
-		if ( TimeSinceDeployed < 0.6f )
+		if ( TimeSinceDeployed < DeployTime )
 			return;
 
-		if ( !IsReloading )
-		{
-			base.Simulate( owner );
-		}
-
-		if ( IsReloading && TimeSinceReload > ReloadTime )
-		{
-			OnReloadFinish();
-		}
-	}
-
-	public virtual void OnReloadFinish()
-	{
-		IsReloading = false;
-
-		if ( Owner is SMLSPlayer player )
-		{
-			var ammo = player.TakeAmmo( AmmoType, ClipSize - AmmoClip );
-			if ( ammo == 0 )
-				return;
-
-			AmmoClip += ammo;
-		}
-	}
-
-	[ClientRpc]
-	public virtual void StartReloadEffects()
-	{
-		ViewModelEntity?.SetAnimBool( "reload", true );
-
-		// TODO - player third person model reload
+		base.Simulate( owner );
 	}
 
 	public override void AttackPrimary()
@@ -212,10 +145,11 @@ partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 
 	public bool TakeAmmo( int amount )
 	{
-		if ( AmmoClip < amount )
+		var owner = Owner as FPSPlayer;
+		if ( owner == null || owner.AmmoCount( AmmoType ) < amount )
 			return false;
 
-		AmmoClip -= amount;
+		owner.TakeAmmo( AmmoType, amount );
 		return true;
 	}
 
@@ -248,9 +182,8 @@ partial class BaseDmWeapon : BaseWeapon, IRespawnableEntity
 		CrosshairPanel.AddClass( ClassInfo.Name );
 	}
 
-	public bool IsUsable()
+	public virtual bool IsUsable()
 	{
-		if ( AmmoClip > 0 ) return true;
 		return AvailableAmmo() > 0;
 	}
 

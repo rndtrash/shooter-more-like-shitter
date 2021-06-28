@@ -2,23 +2,38 @@
 using System;
 using System.Linq;
 
-public partial class SMLSPlayer : Player
+public partial class SMLSBasePlayer : Player
 {
-	public enum Team
+	public enum PlayerTeam
 	{
 		Spectator,
 		TeamAlpha,
 		TeamBeta,
 		FFA
 	}
+	[Net]
+	public PlayerTeam Team { get; set; }
+
+	public bool IsFriendly()
+	{
+		var localP = Local.Pawn as SMLSBasePlayer;
+		if ( localP == null )
+			return false;
+		if ( localP.Team == PlayerTeam.FFA )
+			return localP == this;
+		else
+			return localP.Team == Team;
+	}
+}
+
+public partial class FPSPlayer : SMLSBasePlayer
+{
 
 	TimeSince timeSinceDropped;
 
 	public bool SupressPickupNotices { get; private set; }
-	[Net]
-	public Team PlayerTeam { get; set; }
 
-	public SMLSPlayer()
+	public FPSPlayer()
 	{
 		Inventory = new DmInventory( this );
 	}
@@ -51,10 +66,11 @@ public partial class SMLSPlayer : Player
 		Inventory.Add( new Shotgun() );
 		Inventory.Add( new SMG() );
 		Inventory.Add( new Crossbow() );
+		Inventory.Add( new SniperRifle() );
 
-		GiveAmmo( AmmoType.Pistol, 100 );
-		GiveAmmo( AmmoType.Buckshot, 8 );
-		GiveAmmo( AmmoType.Crossbow, 4 );
+		GiveAmmo( AmmoType.Pistol );
+		GiveAmmo( AmmoType.Buckshot );
+		GiveAmmo( AmmoType.Crossbow );
 
 		SupressPickupNotices = false;
 		Health = 100;
@@ -67,6 +83,7 @@ public partial class SMLSPlayer : Player
 			ColorPlayerRPC( this );
 		}
 	}
+
 	public override void OnKilled()
 	{
 		base.OnKilled();
@@ -108,7 +125,7 @@ public partial class SMLSPlayer : Player
 		{
 			if ( Camera is ThirdPersonCamera )
 			{
-				Camera = new FirstPersonCamera();
+				Camera = new InGameCamera();
 			}
 			else
 			{
@@ -182,7 +199,7 @@ public partial class SMLSPlayer : Player
 
 		base.TakeDamage( info );
 
-		if ( info.Attacker is SMLSPlayer attacker && attacker != this )
+		if ( info.Attacker is FPSPlayer attacker && attacker != this )
 		{
 			// Note - sending this only to the attacker!
 			attacker.DidDamage( To.Single( attacker ), info.Position, info.Damage, Health.LerpInverse( 100, 0 ) );
@@ -209,17 +226,17 @@ public partial class SMLSPlayer : Player
 	}
 
 	[ClientRpc]
-	public void ColorPlayerRPC( SMLSPlayer e )
+	public void ColorPlayerRPC( SMLSBasePlayer e )
 	{
-		e.RenderColor = Settings.Instance.GetPlayerColor(e);
+		e.RenderColor = Settings.Instance.GetPlayerColor( e );
 	}
 
-	[ClientCmd("smls_newcolor_rgb")]
-	public static void NewColorRGB(int r, int g, int b) // FIXME: doesn't work with bytes
+	[ClientCmd( "smls_newcolor_rgb" )]
+	public static void NewColorRGB( int r, int g, int b ) // FIXME: doesn't work with bytes
 	{
-		using (Prediction.Off())
+		using ( Prediction.Off() )
 		{
-			(Local.Pawn as SMLSPlayer).RenderColor = new Color32( (byte)r, (byte)g, (byte)b );
+			(Local.Pawn as SMLSBasePlayer).RenderColor = new Color32( (byte)r, (byte)g, (byte)b );
 		}
 	}
 
@@ -228,7 +245,7 @@ public partial class SMLSPlayer : Player
 	{
 		using ( Prediction.Off() )
 		{
-			(Local.Pawn as SMLSPlayer).RenderColor = new Etc.HSV(h, s, v).ToColor();
+			(Local.Pawn as SMLSBasePlayer).RenderColor = new Etc.HSV( h, s, v ).ToColor();
 		}
 	}
 }

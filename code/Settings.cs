@@ -2,7 +2,8 @@
 
 public class Settings
 {
-	public static Settings Instance {
+	public static Settings Instance
+	{
 		get
 		{
 			Host.AssertClient();
@@ -12,19 +13,19 @@ public class Settings
 		}
 	}
 
-	public float AllyColor = 180.0f;
+	public float AllyColor = 240.0f;
 	public float EnemyColor = 0.0f;
 
 	private static Settings instance;
 
-	public Color GetPlayerColor(SMLSPlayer player)
+	public Color GetPlayerColor( SMLSBasePlayer player )
 	{
-		if ( player.PlayerTeam == SMLSPlayer.Team.Spectator )
+		if ( player.Team == SMLSBasePlayer.PlayerTeam.Spectator )
 			return Color.White;
-		var p = Local.Pawn as SMLSPlayer;
+		var p = Local.Pawn as SMLSBasePlayer;
 
-		if ( player.PlayerTeam != SMLSPlayer.Team.FFA )
-			return new Etc.HSV( player.PlayerTeam == p.PlayerTeam ? AllyColor : EnemyColor, 1.0f, 1.0f ).ToColor();
+		if ( player.Team != SMLSBasePlayer.PlayerTeam.FFA )
+			return new Etc.HSV( player.Team == p.Team ? AllyColor : EnemyColor, 1.0f, 1.0f ).ToColor();
 		else
 			return new Etc.HSV( player == p ? AllyColor : EnemyColor, 1.0f, 1.0f ).ToColor();
 	}

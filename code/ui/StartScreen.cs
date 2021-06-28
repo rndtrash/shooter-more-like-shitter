@@ -87,7 +87,7 @@ public partial class StartScreen : Panel
 	[ClientRpc]
 	public static void SetInitialUsersRPC( int[] networkIdents, ulong[] steamIds, string[] names )
 	{
-		for (var i = 0; i < networkIdents.Length; i++ )
+		for ( var i = 0; i < networkIdents.Length; i++ )
 		{
 			Instance.AddClient( networkIdents[i], steamIds[i], names[i] );
 		}

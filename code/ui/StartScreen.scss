@@ -13,7 +13,7 @@ startscreen {
     justify-content: center;
     align-content: center;
     align-items: center;
-	opacity: 1;
+    opacity: 1;
 
     .sscontainer {
         background-color: rgba(255, 255, 255, 0.8);
@@ -93,5 +93,5 @@ startscreen {
 
 .hide {
     pointer-events: none;
-	opacity: 0;
+    opacity: 0;
 }

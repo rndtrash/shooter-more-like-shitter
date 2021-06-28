@@ -37,7 +37,7 @@ public partial class SMLSHud : HudEntity<RootPanel>
 		RootPanel.AddChild<StartScreen>();
 	}
 
-	private void SwitchPanelsToState(SMLSGame.State gameState)
+	private void SwitchPanelsToState( SMLSGame.State gameState )
 	{
 		//
 	}
