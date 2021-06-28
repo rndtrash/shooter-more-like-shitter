@@ -3,6 +3,7 @@
 obj/
 code/accesslist.txt
 code/*.csproj
+code/code/
 .intermediate
 tools_asset_info.bin
 code/Properties/launchSettings.json
